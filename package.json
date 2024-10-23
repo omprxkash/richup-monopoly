@@ -1,0 +1,26 @@
+{
+  "name": "richup-monopoly",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A real-time, browser-based Monopoly-style board game with private rooms, AI bots and multiple maps.",
+  "author": "omprxkash",
+  "license": "MIT",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,magenta \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "npm run dev --workspace server",
+    "dev:client": "npm run dev --workspace client",
+    "build": "npm run build --workspace shared && npm run build --workspace client && npm run build --workspace server",
+    "start": "npm run start --workspace server",
+    "test": "npm run test --workspace shared",
+    "typecheck": "tsc -b"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "typescript": "^5.6.3"
+  }
+}
