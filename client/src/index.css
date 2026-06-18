@@ -1,0 +1,744 @@
+:root {
+  --bg: #0f1226;
+  --bg-2: #171a35;
+  --panel: #1d2142;
+  --panel-2: #252a52;
+  --line: #323873;
+  --text: #e8eaf6;
+  --muted: #9aa0d0;
+  --accent: #6c7bff;
+  --accent-2: #8a5cff;
+  --good: #36c275;
+  --bad: #e5484d;
+  --warn: #e9b949;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at 20% 10%, #1a1f44, var(--bg));
+  color: var(--text);
+  min-height: 100vh;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: #fff;
+  background: var(--panel-2);
+  transition: transform 0.05s ease, filter 0.15s ease;
+}
+button:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+button.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+button.secondary {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+}
+button.ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+button.danger {
+  background: var(--bad);
+}
+button.big {
+  padding: 12px 18px;
+  font-size: 1.05rem;
+}
+button.tiny {
+  padding: 3px 8px;
+  font-size: 0.8rem;
+}
+button.link-btn {
+  background: none;
+  color: var(--muted);
+  text-decoration: underline;
+  padding: 6px 0;
+}
+
+input,
+select {
+  font: inherit;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+input:focus,
+select:focus {
+  outline: 2px solid var(--accent);
+}
+
+.banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 8px;
+  z-index: 100;
+  font-weight: 600;
+}
+.banner.error {
+  background: var(--bad);
+}
+.banner.warn {
+  background: var(--warn);
+  color: #000;
+}
+
+/* ---------- Home ---------- */
+.home {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 20px;
+}
+.home-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+.logo {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+}
+.logo span {
+  color: var(--accent);
+}
+.tagline {
+  color: var(--muted);
+  margin-top: 4px;
+}
+.field {
+  display: block;
+  margin: 18px 0;
+}
+.field > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.field input {
+  width: 100%;
+}
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+.avatar {
+  font-size: 1.4rem;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  padding: 6px;
+}
+.avatar.selected {
+  border-color: var(--accent);
+  background: var(--panel-2);
+}
+.divider {
+  text-align: center;
+  color: var(--muted);
+  margin: 18px 0 12px;
+  font-size: 0.85rem;
+}
+.join-row {
+  display: flex;
+  gap: 8px;
+}
+.code-input {
+  flex: 1;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-align: center;
+  font-weight: 700;
+}
+.home-foot {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* ---------- Lobby ---------- */
+.lobby {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+.lobby-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.panel h2 {
+  margin-top: 0;
+}
+.invite {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.invite input {
+  flex: 1;
+}
+.player-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+.player-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-2);
+  border-left: 4px solid;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+}
+.token {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 1rem;
+}
+.pname {
+  font-weight: 600;
+  flex: 1;
+}
+.host-badge,
+.you-badge {
+  font-style: normal;
+  font-size: 0.7rem;
+  background: var(--panel-2);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 6px;
+  color: var(--muted);
+}
+.you-badge {
+  color: var(--accent);
+}
+.bot-tag {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.lobby-actions {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0;
+}
+.map-picker {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.map-card {
+  flex: 1;
+  min-width: 140px;
+  text-align: left;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.map-card.selected {
+  border-color: var(--accent);
+}
+.map-card span {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.settings {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.srow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.srow input,
+.srow select {
+  width: 130px;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+.muted {
+  color: var(--muted);
+}
+
+/* ---------- Game ---------- */
+.game {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 16px;
+  padding: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: start;
+}
+.game-main {
+  position: relative;
+}
+.board {
+  display: grid;
+  width: min(78vh, 100%);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  gap: 2px;
+  background: var(--line);
+  border: 2px solid var(--line);
+  border-radius: 10px;
+}
+.tile {
+  background: var(--panel);
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.6rem;
+}
+.tile-strip {
+  height: 14%;
+  min-height: 6px;
+  width: 100%;
+}
+.tile-body {
+  padding: 2px 3px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.tile-name {
+  font-weight: 600;
+  line-height: 1.05;
+}
+.tile-icon {
+  margin-right: 2px;
+}
+.tile-price {
+  color: var(--muted);
+}
+.tile-build {
+  font-size: 0.7rem;
+}
+.tile-mortgage {
+  color: var(--bad);
+  font-weight: 700;
+  font-size: 0.5rem;
+}
+.kind-start,
+.kind-jail,
+.kind-vacation,
+.kind-gotojail {
+  background: var(--panel-2);
+}
+.tile-tokens {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  max-width: 70%;
+  justify-content: flex-end;
+}
+.board-token {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+}
+.board-center {
+  background: var(--bg-2);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.center-logo {
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+.center-logo span {
+  color: var(--accent);
+}
+.center-map {
+  color: var(--muted);
+}
+.center-pot {
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.game-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.players {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.player-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left-width: 4px;
+  border-radius: 8px;
+  padding: 8px;
+}
+.player-card.active {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.player-card.bankrupt {
+  opacity: 0.45;
+}
+.player-info {
+  flex: 1;
+}
+.player-top {
+  display: flex;
+  justify-content: space-between;
+}
+.cash {
+  font-weight: 700;
+  color: var(--good);
+}
+.player-sub {
+  display: flex;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+.jailed {
+  color: var(--warn);
+}
+.out {
+  color: var(--bad);
+}
+
+.actionbar {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+}
+.turn-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.turn-name {
+  font-weight: 700;
+}
+.dice {
+  display: flex;
+  gap: 4px;
+  font-size: 1.8rem;
+  line-height: 1;
+}
+.dice.empty {
+  color: var(--muted);
+  font-size: 1rem;
+}
+.action-buttons,
+.manage-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.manage-buttons {
+  margin-top: 10px;
+}
+.debt {
+  background: rgba(229, 72, 77, 0.15);
+  border: 1px solid var(--bad);
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+}
+.debt button {
+  margin-top: 6px;
+}
+.actionbar.ended {
+  text-align: center;
+}
+.trade-alert {
+  width: 100%;
+}
+
+.log,
+.chat {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+}
+.log h4,
+.chat h4 {
+  margin: 0 0 8px;
+}
+.log ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  font-size: 0.8rem;
+}
+.log li {
+  padding: 3px 0;
+  border-bottom: 1px solid var(--bg-2);
+  color: var(--muted);
+}
+.chat-msgs {
+  max-height: 140px;
+  overflow-y: auto;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+.chat-msg {
+  padding: 2px 0;
+}
+.chat-name {
+  color: var(--accent);
+  font-weight: 600;
+}
+.chat-msg.mine .chat-name {
+  color: var(--accent-2);
+}
+.chat-input {
+  display: flex;
+  gap: 6px;
+}
+.chat-input input {
+  flex: 1;
+}
+
+/* ---------- Modals ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+}
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+}
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.auction {
+  max-width: 420px;
+  text-align: center;
+}
+.auction-status {
+  margin: 14px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.auction-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.auction-controls input {
+  width: 120px;
+}
+.manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.manage-row {
+  background: var(--bg-2);
+  border-left: 4px solid;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.manage-name {
+  font-weight: 600;
+}
+.mtg-tag {
+  color: var(--bad);
+  font-size: 0.75rem;
+  margin-left: 6px;
+}
+.manage-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.trade-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 14px 0;
+}
+.trade-col {
+  background: var(--bg-2);
+  border-radius: 8px;
+  padding: 12px;
+}
+.trade-col h4 {
+  margin-top: 0;
+}
+.trade-tiles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 180px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+.trade-tile {
+  display: flex;
+  gap: 6px;
+  font-size: 0.85rem;
+  align-items: center;
+}
+.incoming-trades {
+  background: var(--bg-2);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+.incoming {
+  border-top: 1px solid var(--line);
+  padding: 8px 0;
+  font-size: 0.85rem;
+}
+.incoming-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.card-popup {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel-2);
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 16px;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  animation: pop 0.25s ease;
+}
+.card-popup.treasure {
+  border-color: var(--good);
+}
+.card-popup-head {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+@keyframes pop {
+  from {
+    transform: translateX(-50%) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 980px) {
+  .game,
+  .lobby-grid {
+    grid-template-columns: 1fr;
+  }
+  .board {
+    width: 100%;
+  }
+}
