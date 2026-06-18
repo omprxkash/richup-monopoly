@@ -1,37 +1,16 @@
 import { getMap, type GameState, type Tile } from '@richup/shared';
 
-interface Pos {
-  gridRow: number;
-  gridColumn: number;
-  side: 'bottom' | 'left' | 'top' | 'right' | 'corner';
-}
-
-export function gridPos(index: number, perSide: number): Pos {
-  const G = perSide + 2; // grid dimension
+export function gridPos(index: number, perSide: number) {
+  const G = perSide + 2;
   const corner = perSide + 1;
-
-  if (index === 0) return { gridRow: G, gridColumn: G, side: 'corner' };
-  if (index === corner) return { gridRow: G, gridColumn: 1, side: 'corner' };
-  if (index === corner * 2) return { gridRow: 1, gridColumn: 1, side: 'corner' };
-  if (index === corner * 3) return { gridRow: 1, gridColumn: G, side: 'corner' };
-
-  if (index < corner) {
-    // bottom row, right -> left
-    return { gridRow: G, gridColumn: G - index, side: 'bottom' };
-  }
-  if (index < corner * 2) {
-    // left column, bottom -> top
-    const k = index - corner;
-    return { gridRow: G - 1 - k, gridColumn: 1, side: 'left' };
-  }
-  if (index < corner * 3) {
-    // top row, left -> right
-    const k = index - corner * 2;
-    return { gridRow: 1, gridColumn: 1 + k, side: 'top' };
-  }
-  // right column, top -> bottom
-  const k = index - corner * 3;
-  return { gridRow: 1 + k, gridColumn: G, side: 'right' };
+  if (index === 0)           return { r: G,   c: G,   side: 'corner' };
+  if (index === corner)      return { r: G,   c: 1,   side: 'corner' };
+  if (index === corner * 2)  return { r: 1,   c: 1,   side: 'corner' };
+  if (index === corner * 3)  return { r: 1,   c: G,   side: 'corner' };
+  if (index < corner)        return { r: G,   c: G - index,               side: 'bottom' };
+  if (index < corner * 2)    return { r: G - 1 - (index - corner), c: 1,  side: 'left' };
+  if (index < corner * 3)    return { r: 1,   c: 1 + (index - corner * 2), side: 'top' };
+  return { r: 1 + (index - corner * 3), c: G,                             side: 'right' };
 }
 
 function groupColor(map: ReturnType<typeof getMap>, tile: Tile): string | null {
@@ -39,21 +18,18 @@ function groupColor(map: ReturnType<typeof getMap>, tile: Tile): string | null {
   return map.groups.find((g) => g.id === tile.group)?.color ?? '#888';
 }
 
+const CORNER_ICON: Record<string, string> = {
+  start: '🏁', jail: '🚔', gotojail: '👮', vacation: '🏝️',
+};
 const KIND_ICON: Record<string, string> = {
-  airport: '✈️',
-  company: '💡',
-  surprise: '❓',
-  treasure: '🎁',
+  airport: '✈️', company: '⚡', surprise: '❓', treasure: '🎁',
   tax: '💸',
-  jail: '🚔',
-  gotojail: '👮',
-  vacation: '🏝️',
-  start: '🏁',
 };
 
-export function Board({ game }: { game: GameState }) {
+export function Board({ game, me }: { game: GameState; me: string | null }) {
   const map = getMap(game.mapId);
   const G = map.perSide + 2;
+  const current = game.players[game.currentIdx];
 
   return (
     <div
@@ -64,56 +40,119 @@ export function Board({ game }: { game: GameState }) {
       }}
     >
       {map.tiles.map((tile) => {
-        const pos = gridPos(tile.id, map.perSide);
+        const { r, c, side } = gridPos(tile.id, map.perSide);
         const ts = game.tiles[tile.id];
         const owner = ts?.ownerId ? game.players.find((p) => p.id === ts.ownerId) : null;
         const here = game.players.filter((p) => !p.isBankrupt && p.position === tile.id);
         const gc = groupColor(map, tile);
-        const ownable = tile.kind === 'property' || tile.kind === 'airport' || tile.kind === 'company';
+        const isCorner = side === 'corner';
+        const isMine = ts?.ownerId === me;
+        const isActive = here.some((p) => p.id === current?.id);
 
         return (
           <div
             key={tile.id}
-            className={`tile side-${pos.side} kind-${tile.kind}`}
+            className={[
+              'tile',
+              `side-${side}`,
+              `kind-${tile.kind}`,
+              isCorner ? 'tile-corner' : '',
+              isMine ? 'tile-mine' : '',
+              isActive ? 'tile-active' : '',
+            ].join(' ')}
             style={{
-              gridRow: pos.gridRow,
-              gridColumn: pos.gridColumn,
-              boxShadow: owner ? `inset 0 0 0 3px ${owner.color}` : undefined,
-            }}
+              gridRow: r,
+              gridColumn: c,
+              '--owner-color': owner?.color ?? 'transparent',
+            } as React.CSSProperties}
           >
+            {/* Colour strip for properties */}
             {gc && <div className="tile-strip" style={{ background: gc }} />}
+
+            {/* Owner bar on non-property ownables */}
+            {owner && !gc && (
+              <div className="tile-owner-bar" style={{ background: owner.color }} />
+            )}
+
             <div className="tile-body">
-              <div className="tile-name">
-                {KIND_ICON[tile.kind] && <span className="tile-icon">{KIND_ICON[tile.kind]}</span>}
-                {tile.name}
-              </div>
-              {ownable && !owner && 'price' in tile && <div className="tile-price">${tile.price}</div>}
-              {ts && (ts.houses > 0 || ts.hotel) && (
-                <div className="tile-build">{ts.hotel ? '🏨' : '🏠'.repeat(ts.houses)}</div>
+              {isCorner ? (
+                <div className="tile-corner-inner">
+                  <span className="tile-corner-icon">{CORNER_ICON[tile.kind]}</span>
+                  <span className="tile-corner-name">{tile.name}</span>
+                </div>
+              ) : (
+                <>
+                  {KIND_ICON[tile.kind] && (
+                    <span className="tile-kind-icon">{KIND_ICON[tile.kind]}</span>
+                  )}
+                  <div className="tile-name">{tile.name}</div>
+                  {'price' in tile && !owner && (
+                    <div className="tile-price">${tile.price}</div>
+                  )}
+                  {'amount' in tile && (
+                    <div className="tile-price tax">${tile.amount}</div>
+                  )}
+                  {ts && (ts.houses > 0 || ts.hotel) && (
+                    <div className="tile-buildings">
+                      {ts.hotel
+                        ? <span className="hotel-icon">H</span>
+                        : Array.from({ length: ts.houses }, (_, i) => (
+                            <span key={i} className="house-icon" />
+                          ))}
+                    </div>
+                  )}
+                  {ts?.mortgaged && <div className="tile-mort">MTG</div>}
+                </>
               )}
-              {ts?.mortgaged && <div className="tile-mortgage">MORTGAGED</div>}
             </div>
+
+            {/* Player tokens */}
             {here.length > 0 && (
               <div className="tile-tokens">
                 {here.map((p) => (
-                  <span key={p.id} className="board-token" style={{ background: p.color }} title={p.name}>
+                  <span
+                    key={p.id}
+                    className={'board-token' + (p.id === me ? ' token-me' : '')}
+                    style={{ background: p.color }}
+                    title={p.name}
+                  >
                     {p.avatar}
                   </span>
                 ))}
               </div>
             )}
+
+            {/* Owner dot in corner */}
+            {owner && (
+              <span
+                className="tile-owner-dot"
+                style={{ background: owner.color }}
+                title={owner.name}
+              />
+            )}
           </div>
         );
       })}
+
+      {/* Board centre */}
       <div
         className="board-center"
         style={{ gridRow: `2 / span ${map.perSide}`, gridColumn: `2 / span ${map.perSide}` }}
       >
-        <div className="center-logo">
-          Richup<span>·Monopoly</span>
-        </div>
-        <div className="center-map">{map.name}</div>
-        {game.pot > 0 && <div className="center-pot">🏝️ Vacation pot: ${game.pot}</div>}
+        <div className="center-logo">Richup<span>·Monopoly</span></div>
+        {game.pot > 0 && (
+          <div className="center-pot">🏝️ Vacation ${game.pot}</div>
+        )}
+        {current && game.phase !== 'ended' && (
+          <div className="center-turn" style={{ borderColor: current.color }}>
+            <span className="ct-token" style={{ background: current.color }}>
+              {current.avatar}
+            </span>
+            <span className="ct-name" style={{ color: current.color }}>
+              {current.name}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
