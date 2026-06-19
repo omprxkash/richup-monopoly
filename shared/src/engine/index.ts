@@ -19,6 +19,18 @@ import { rollDie, shuffle } from '../rng';
 
 const clone = (s: GameState): GameState => structuredClone(s);
 
+function playerNetWorth(state: GameState, map: MapDef, player: Player): number {
+  let total = player.cash;
+  for (const t of map.tiles) {
+    if (!('price' in t)) continue;
+    const ts = state.tiles[t.id];
+    if (ts.ownerId !== player.id) continue;
+    total += ts.mortgaged ? Math.floor(t.price / 2) : t.price;
+    if (t.kind === 'property') total += (ts.hotel ? 5 : ts.houses) * Math.floor(t.houseCost / 2);
+  }
+  return total;
+}
+
 // ---------- small lookups ------------------------------------------------
 
 function tileAt(map: MapDef, id: number): Tile {
@@ -259,9 +271,12 @@ function resolveLanding(state: GameState, map: MapDef, player: Player, allowCard
       break;
     }
     case 'tax': {
-      charge(state, player, tile.amount, null);
-      if (state.settings.vacationCashPot) state.pot += tile.amount;
-      log(state, `${player.name} paid ${tile.amount} in tax.`);
+      const amount = state.settings.incomeTaxMode === 'percent'
+        ? Math.max(1, Math.floor(playerNetWorth(state, map, player) * 0.1))
+        : tile.amount;
+      charge(state, player, amount, null);
+      if (state.settings.vacationCashPot) state.pot += amount;
+      log(state, `${player.name} paid $${amount} in tax.`);
       break;
     }
     case 'surprise':

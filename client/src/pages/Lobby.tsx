@@ -149,6 +149,27 @@ export function Lobby() {
               />
               Taxes pile up on Vacation
             </label>
+            <label className="srow">
+              <span>Income tax mode</span>
+              <select
+                value={s.incomeTaxMode}
+                onChange={(e) => actions.updateSettings({ incomeTaxMode: e.target.value as 'flat' | 'percent' })}
+              >
+                <option value="flat">Flat amount</option>
+                <option value="percent">10% of net worth</option>
+              </select>
+            </label>
+            <label className="srow">
+              <span>Bot difficulty</span>
+              <select
+                value={s.botDifficulty}
+                onChange={(e) => actions.updateSettings({ botDifficulty: e.target.value as 'easy' | 'medium' | 'hard' })}
+              >
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </label>
           </fieldset>
         </section>
       </div>

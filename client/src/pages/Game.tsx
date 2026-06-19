@@ -3,6 +3,7 @@ import { getMap } from '@richup/shared';
 import { useStore } from '../net/socket';
 import { Board } from '../components/Board';
 import { PlayerPanel } from '../components/PlayerPanel';
+import { PlayerHUD } from '../components/PlayerHUD';
 import { ActionBar } from '../components/ActionBar';
 import { AuctionModal } from '../components/AuctionModal';
 import { TradeModal } from '../components/TradeModal';
@@ -51,21 +52,12 @@ export function Game() {
   if (!room || !game) return null;
 
   const incomingTrades = game.pendingTrades.filter((t) => t.to === me).length;
-  const current = game.players[game.currentIdx];
-  const myTurn = current?.id === me;
   const map = getMap(game.mapId);
 
   return (
     <div className="game">
-      {/* Turn banner */}
-      <div className="turn-banner" style={{ borderColor: current?.color }}>
-        <span className="turn-banner-dot" style={{ background: current?.color }} />
-        {game.phase === 'ended'
-          ? '🏆 Game over'
-          : myTurn
-            ? '🎯 Your turn'
-            : `${current?.name}'s turn`}
-      </div>
+      {/* Top HUD — player strips + vacation pot */}
+      <PlayerHUD game={game} me={me} />
 
       <div className="game-body">
         {/* Board area */}

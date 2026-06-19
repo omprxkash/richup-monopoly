@@ -119,6 +119,8 @@ export interface Settings {
   startBonus: number;
   turnTimerSec: number;
   maxPlayers: number;
+  incomeTaxMode: 'flat' | 'percent';
+  botDifficulty: 'easy' | 'medium' | 'hard';
 }
 
 export interface AuctionState {
@@ -198,6 +200,8 @@ export const DEFAULT_SETTINGS: Settings = {
   startBonus: 200,
   turnTimerSec: 0,
   maxPlayers: 4,
+  incomeTaxMode: 'flat',
+  botDifficulty: 'medium',
 };
 
 export const PLAYER_COLORS = [
