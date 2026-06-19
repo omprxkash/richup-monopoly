@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { getMap, type GameState, type Tile } from '@richup/shared';
 
 export function gridPos(index: number, perSide: number) {
@@ -22,8 +23,7 @@ const CORNER_ICON: Record<string, string> = {
   start: '🏁', jail: '🚔', gotojail: '👮', vacation: '🏝️',
 };
 const KIND_ICON: Record<string, string> = {
-  airport: '✈️', company: '⚡', surprise: '❓', treasure: '🎁',
-  tax: '💸',
+  airport: '✈️', company: '⚡', surprise: '❓', treasure: '🎁', tax: '💸',
 };
 
 export function Board({ game, me, onTileClick }: {
@@ -34,6 +34,61 @@ export function Board({ game, me, onTileClick }: {
   const map = getMap(game.mapId);
   const G = map.perSide + 2;
   const current = game.players[game.currentIdx];
+  const totalTiles = map.tiles.length;
+
+  // Displayed positions for each player (drives animation)
+  const [displayPos, setDisplayPos] = useState<Record<string, number>>(() =>
+    Object.fromEntries(game.players.map((p) => [p.id, p.position])),
+  );
+  const animTimers = useRef<Record<string, ReturnType<typeof setTimeout>[]>>({});
+
+  useEffect(() => {
+    game.players.forEach((player) => {
+      const from = displayPos[player.id] ?? player.position;
+      const to = player.position;
+      if (from === to) return;
+
+      // Cancel existing animation for this player
+      (animTimers.current[player.id] ?? []).forEach(clearTimeout);
+      animTimers.current[player.id] = [];
+
+      // Compute forward path
+      const path: number[] = [];
+      let pos = from;
+      let steps = 0;
+      while (pos !== to && steps < totalTiles) {
+        pos = (pos + 1) % totalTiles;
+        path.push(pos);
+        steps++;
+      }
+
+      // Teleport for jail jumps (path > half the board)
+      if (path.length > totalTiles / 2 || path.length === 0) {
+        setDisplayPos((prev) => ({ ...prev, [player.id]: to }));
+        return;
+      }
+
+      // Hop one space every 140ms
+      path.forEach((step, i) => {
+        const t = setTimeout(() => {
+          setDisplayPos((prev) => ({ ...prev, [player.id]: step }));
+        }, i * 140);
+        animTimers.current[player.id].push(t);
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game.players.map((p) => `${p.id}:${p.position}`).join(',')]);
+
+  // Sync display positions for new/reset players
+  useEffect(() => {
+    setDisplayPos((prev) => {
+      const next = { ...prev };
+      game.players.forEach((p) => {
+        if (!(p.id in next)) next[p.id] = p.position;
+      });
+      return next;
+    });
+  }, [game.players.length]);
 
   return (
     <div
@@ -47,7 +102,9 @@ export function Board({ game, me, onTileClick }: {
         const { r, c, side } = gridPos(tile.id, map.perSide);
         const ts = game.tiles[tile.id];
         const owner = ts?.ownerId ? game.players.find((p) => p.id === ts.ownerId) : null;
-        const here = game.players.filter((p) => !p.isBankrupt && p.position === tile.id);
+        const here = game.players.filter(
+          (p) => !p.isBankrupt && (displayPos[p.id] ?? p.position) === tile.id,
+        );
         const gc = groupColor(map, tile);
         const isCorner = side === 'corner';
         const isMine = ts?.ownerId === me;
@@ -73,10 +130,7 @@ export function Board({ game, me, onTileClick }: {
             } as React.CSSProperties}
             onClick={isOwnable ? () => onTileClick?.(tile.id) : undefined}
           >
-            {/* Colour strip for properties */}
             {gc && <div className="tile-strip" style={{ background: gc }} />}
-
-            {/* Owner bar on non-property ownables */}
             {owner && !gc && (
               <div className="tile-owner-bar" style={{ background: owner.color }} />
             )}
@@ -113,13 +167,12 @@ export function Board({ game, me, onTileClick }: {
               )}
             </div>
 
-            {/* Player tokens */}
             {here.length > 0 && (
               <div className="tile-tokens">
                 {here.map((p) => (
                   <span
                     key={p.id}
-                    className={'board-token' + (p.id === me ? ' token-me' : '')}
+                    className={'board-token' + (p.id === me ? ' token-me' : '') + ' token-arrive'}
                     style={{ background: p.color }}
                     title={p.name}
                   >
@@ -129,7 +182,6 @@ export function Board({ game, me, onTileClick }: {
               </div>
             )}
 
-            {/* Owner dot in corner */}
             {owner && (
               <span
                 className="tile-owner-dot"
@@ -141,7 +193,6 @@ export function Board({ game, me, onTileClick }: {
         );
       })}
 
-      {/* Board centre */}
       <div
         className="board-center"
         style={{ gridRow: `2 / span ${map.perSide}`, gridColumn: `2 / span ${map.perSide}` }}

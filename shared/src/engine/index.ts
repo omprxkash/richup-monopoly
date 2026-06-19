@@ -150,7 +150,7 @@ function moveSteps(state: GameState, map: MapDef, player: Player, steps: number)
   player.position = np;
 }
 
-function moveToTile(state: GameState, map: MapDef, player: Player, tileId: number, collectStart: boolean): void {
+function moveToTile(state: GameState, _map: MapDef, player: Player, tileId: number, collectStart: boolean): void {
   if (collectStart && tileId < player.position) {
     player.cash += state.settings.startBonus;
     log(state, `${player.name} passed Start and collected ${state.settings.startBonus}.`);
@@ -678,7 +678,7 @@ export function jailAction(prev: GameState, playerId: string, action: 'roll' | '
     log(state, `${player.name} rolled doubles and left Jail.`);
     moveSteps(state, map, player, sum);
     resolveLanding(state, map, player, true);
-    if (state.phase !== 'awaiting-buy' && !state.winnerId) state.phase = 'turn-end';
+    if ((state.phase as string) !== 'awaiting-buy' && !state.winnerId) state.phase = 'turn-end';
     return state;
   }
   player.jailTurns += 1;
@@ -691,7 +691,7 @@ export function jailAction(prev: GameState, playerId: string, action: 'roll' | '
       moveSteps(state, map, player, sum);
       resolveLanding(state, map, player, true);
     }
-    if (state.phase !== 'awaiting-buy' && !state.winnerId) state.phase = 'turn-end';
+    if ((state.phase as string) !== 'awaiting-buy' && !state.winnerId) state.phase = 'turn-end';
   } else {
     state.phase = 'turn-end';
     log(state, `${player.name} stays in Jail.`);

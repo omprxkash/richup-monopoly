@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getMap, type GameState, type TradeOffer, type OwnableTile } from '@richup/shared';
+import { getMap, type GameState, type TradeOffer, type OwnableTile, type Trade } from '@richup/shared';
 import { actions } from '../net/socket';
 
 function tradeableTiles(game: GameState, ownerId: string): OwnableTile[] {
@@ -22,6 +22,7 @@ export function TradeModal({ game, me, onClose }: { game: GameState; me: string 
   const [recvTiles, setRecvTiles] = useState<number[]>([]);
   const [giveJail, setGiveJail] = useState(0);
   const [recvJail, setRecvJail] = useState(0);
+  const [counteringId, setCounteringId] = useState<string | null>(null);
 
   const incoming = game.pendingTrades.filter((t) => t.to === me);
   const myTiles = me ? tradeableTiles(game, me) : [];
@@ -39,31 +40,47 @@ export function TradeModal({ game, me, onClose }: { game: GameState; me: string 
     onClose();
   };
 
+  const startCounter = (t: Trade) => {
+    // Pre-fill form with swapped offer
+    setPartner(t.from);
+    setGiveCash(t.receive.cash);
+    setGiveTiles([...t.receive.tileIds]);
+    setGiveJail(t.receive.jailCards);
+    setRecvCash(t.give.cash);
+    setRecvTiles([...t.give.tileIds]);
+    setRecvJail(t.give.jailCards);
+    setCounteringId(t.id);
+    // Decline the original
+    actions.respondTrade(t.id, false);
+  };
+
+  const map = getMap(game.mapId);
+  const names = (ids: number[]) => ids.map((id) => map.tiles[id]?.name).filter(Boolean).join(', ') || '—';
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal trade" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
-          <h3>Trade</h3>
-          <button className="tiny" onClick={onClose}>
-            ✕
-          </button>
+          <h3>Trade{counteringId ? ' — Counter-offer' : ''}</h3>
+          <button className="tiny" onClick={onClose}>✕</button>
         </div>
 
-        {incoming.length > 0 && (
+        {/* Incoming offers */}
+        {incoming.length > 0 && !counteringId && (
           <div className="incoming-trades">
             <h4>Offers to you</h4>
             {incoming.map((t) => {
               const from = game.players.find((p) => p.id === t.from);
-              const map = getMap(game.mapId);
-              const names = (ids: number[]) => ids.map((id) => map.tiles[id].name).join(', ') || '—';
               return (
                 <div key={t.id} className="incoming">
                   <div>
-                    <strong>{from?.name}</strong> gives: ${t.give.cash}, {names(t.give.tileIds)}
+                    <strong>{from?.name}</strong> gives you: ${t.give.cash}
+                    {t.give.tileIds.length > 0 && `, ${names(t.give.tileIds)}`}
                     {t.give.jailCards > 0 && `, ${t.give.jailCards} jail card(s)`}
                   </div>
                   <div>
-                    You give: ${t.receive.cash}, {names(t.receive.tileIds)}
+                    You give: ${t.receive.cash}
+                    {t.receive.tileIds.length > 0 && `, ${names(t.receive.tileIds)}`}
                     {t.receive.jailCards > 0 && `, ${t.receive.jailCards} jail card(s)`}
                   </div>
                   <div className="incoming-btns">
@@ -73,10 +90,19 @@ export function TradeModal({ game, me, onClose }: { game: GameState; me: string 
                     <button className="secondary tiny" onClick={() => actions.respondTrade(t.id, false)}>
                       Decline
                     </button>
+                    <button className="ghost tiny" onClick={() => startCounter(t)}>
+                      Counter-offer
+                    </button>
                   </div>
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {counteringId && (
+          <div className="counter-badge">
+            Countering offer from {game.players.find(p => p.id === partner)?.name} — adjust and send
           </div>
         )}
 
@@ -86,11 +112,9 @@ export function TradeModal({ game, me, onClose }: { game: GameState; me: string 
           <>
             <label className="srow">
               <span>Trade with</span>
-              <select value={partner} onChange={(e) => setPartner(e.target.value)}>
+              <select value={partner} onChange={(e) => { setPartner(e.target.value); setCounteringId(null); }}>
                 {others.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
+                  <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
             </label>
@@ -121,7 +145,7 @@ export function TradeModal({ game, me, onClose }: { game: GameState; me: string 
               </div>
 
               <div className="trade-col">
-                <h4>You receive {partnerPlayer && `from ${partnerPlayer.name}`}</h4>
+                <h4>You receive{partnerPlayer ? ` from ${partnerPlayer.name}` : ''}</h4>
                 <label className="srow">
                   <span>Cash</span>
                   <input type="number" min={0} value={recvCash} onChange={(e) => setRecvCash(Number(e.target.value))} />
@@ -146,7 +170,7 @@ export function TradeModal({ game, me, onClose }: { game: GameState; me: string 
             </div>
 
             <button className="primary" onClick={propose}>
-              Send offer
+              {counteringId ? 'Send counter-offer' : 'Send offer'}
             </button>
           </>
         )}

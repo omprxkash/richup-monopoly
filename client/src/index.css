@@ -661,20 +661,62 @@ button.big { padding: 11px 18px; font-size: 1rem; width: 100%; }
   color: var(--accent);
 }
 
-/* White numbered dice boxes (Unicode pip chars don't render on all systems) */
-.die-face {
+/* ── 3D CSS dice ─────────────────────────────────── */
+.die-3d-scene {
+  width: 54px; height: 54px;
+  perspective: 180px;
+  flex-shrink: 0;
+}
+
+.die-3d-cube {
+  width: 54px; height: 54px;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(0deg) rotateY(0deg);
+  transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.die-3d-cube.die-3d-rolling {
+  animation: die3dSpin 0.32s linear infinite;
+}
+
+@keyframes die3dSpin {
+  from { transform: rotateX(0deg)   rotateY(0deg)   rotateZ(0deg); }
+  to   { transform: rotateX(360deg) rotateY(540deg) rotateZ(0deg); }
+}
+
+.die-3d-face {
+  position: absolute;
   width: 54px; height: 54px;
   background: #fff;
-  color: #0d1022;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.9rem; font-weight: 900;
-  box-shadow: 0 4px 14px rgba(0,0,0,.55);
-  user-select: none;
+  border: 1.5px solid rgba(0,0,0,0.12);
+  border-radius: 9px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  padding: 7px;
+  gap: 4px;
+  box-sizing: border-box;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+  backface-visibility: hidden;
 }
-.die-face.die-rolling {
-  animation: diceRoll .35s ease;
+
+/* Face positions — half-size is 27px */
+.die-3d-face:nth-child(1) { transform: rotateY(0deg)    translateZ(27px); }
+.die-3d-face:nth-child(2) { transform: rotateY(180deg)  translateZ(27px); }
+.die-3d-face:nth-child(3) { transform: rotateY(90deg)   translateZ(27px); }
+.die-3d-face:nth-child(4) { transform: rotateY(-90deg)  translateZ(27px); }
+.die-3d-face:nth-child(5) { transform: rotateX(90deg)   translateZ(27px); }
+.die-3d-face:nth-child(6) { transform: rotateX(-90deg)  translateZ(27px); }
+
+.die-pip {
+  background: #1a1a2e;
+  border-radius: 50%;
+  width: 100%; height: 100%;
 }
+
+.die-pip-empty { /* invisible spacer */ }
+
 .dice-plus {
   font-size: 1.4rem;
   color: var(--muted);
@@ -750,6 +792,50 @@ button.tiny { padding: 3px 8px; font-size: .75rem; }
 .incoming-trades { background: var(--bg2); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
 .incoming { border-top: 1px solid var(--line); padding: 8px 0; font-size: .82rem; }
 .incoming-btns { display: flex; gap: 7px; margin-top: 6px; }
+
+/* ── token hop-in animation ──────────────────────── */
+@keyframes tokenArrive {
+  0%   { transform: scale(0) translateY(-6px); opacity: 0; }
+  55%  { transform: scale(1.35) translateY(-3px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+.token-arrive {
+  animation: tokenArrive 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── turn timer bar ──────────────────────────────── */
+.turn-timer-wrap {
+  position: relative;
+  height: 5px;
+  background: var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.turn-timer-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 3px;
+  transition: width .9s linear, background .3s;
+}
+.turn-timer-label {
+  position: absolute;
+  right: 0; top: -16px;
+  font-size: .65rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* ── counter-offer badge ─────────────────────────── */
+.counter-badge {
+  background: rgba(138,92,255,.15);
+  border: 1px solid rgba(138,92,255,.4);
+  border-radius: 7px;
+  padding: 6px 10px;
+  font-size: .78rem;
+  color: var(--accent2);
+  margin-bottom: 10px;
+}
 
 /* ── clickable tiles ─────────────────────────────── */
 .tile-ownable { cursor: pointer; }

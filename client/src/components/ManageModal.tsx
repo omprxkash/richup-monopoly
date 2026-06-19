@@ -1,9 +1,9 @@
-import { getMap, type GameState } from '@richup/shared';
+import { getMap, type GameState, type OwnableTile } from '@richup/shared';
 import { actions } from '../net/socket';
 
 export function ManageModal({ game, me, onClose }: { game: GameState; me: string | null; onClose: () => void }) {
   const map = getMap(game.mapId);
-  const mine = map.tiles.filter((t) => 'price' in t && game.tiles[t.id].ownerId === me);
+  const mine = map.tiles.filter((t) => 'price' in t && game.tiles[t.id].ownerId === me) as OwnableTile[];
 
   return (
     <div className="modal-backdrop" onClick={onClose}>

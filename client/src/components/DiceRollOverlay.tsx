@@ -1,12 +1,5 @@
 import { useEffect, useState } from 'react';
-
-function DieFace({ n, rolling }: { n: number; rolling: boolean }) {
-  return (
-    <div className={'die-face' + (rolling ? ' die-rolling' : '')}>
-      {n}
-    </div>
-  );
-}
+import { Die3D } from './Die3D';
 
 interface Props {
   name: string;
@@ -19,7 +12,7 @@ interface Props {
 export function DiceRollOverlay({ name, color, avatar, d1, d2 }: Props) {
   const [rolling, setRolling] = useState(true);
   useEffect(() => {
-    const t = setTimeout(() => setRolling(false), 350);
+    const t = setTimeout(() => setRolling(false), 420);
     return () => clearTimeout(t);
   }, []);
 
@@ -31,9 +24,9 @@ export function DiceRollOverlay({ name, color, avatar, d1, d2 }: Props) {
           <span style={{ color }}>{name} rolled</span>
         </div>
         <div className="dice-overlay-dice">
-          <DieFace n={d1} rolling={rolling} />
+          <Die3D value={d1} rolling={rolling} />
           <span className="dice-plus">+</span>
-          <DieFace n={d2} rolling={rolling} />
+          <Die3D value={d2} rolling={rolling} />
         </div>
         <div className="dice-overlay-sum">= {d1 + d2}</div>
       </div>
