@@ -26,7 +26,11 @@ const KIND_ICON: Record<string, string> = {
   tax: '💸',
 };
 
-export function Board({ game, me }: { game: GameState; me: string | null }) {
+export function Board({ game, me, onTileClick }: {
+  game: GameState;
+  me: string | null;
+  onTileClick?: (tileId: number) => void;
+}) {
   const map = getMap(game.mapId);
   const G = map.perSide + 2;
   const current = game.players[game.currentIdx];
@@ -48,6 +52,7 @@ export function Board({ game, me }: { game: GameState; me: string | null }) {
         const isCorner = side === 'corner';
         const isMine = ts?.ownerId === me;
         const isActive = here.some((p) => p.id === current?.id);
+        const isOwnable = 'price' in tile;
 
         return (
           <div
@@ -59,12 +64,14 @@ export function Board({ game, me }: { game: GameState; me: string | null }) {
               isCorner ? 'tile-corner' : '',
               isMine ? 'tile-mine' : '',
               isActive ? 'tile-active' : '',
+              isOwnable ? 'tile-ownable' : '',
             ].join(' ')}
             style={{
               gridRow: r,
               gridColumn: c,
               '--owner-color': owner?.color ?? 'transparent',
             } as React.CSSProperties}
+            onClick={isOwnable ? () => onTileClick?.(tile.id) : undefined}
           >
             {/* Colour strip for properties */}
             {gc && <div className="tile-strip" style={{ background: gc }} />}

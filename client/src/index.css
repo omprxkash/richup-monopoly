@@ -751,6 +751,179 @@ button.tiny { padding: 3px 8px; font-size: .75rem; }
 .incoming { border-top: 1px solid var(--line); padding: 8px 0; font-size: .82rem; }
 .incoming-btns { display: flex; gap: 7px; margin-top: 6px; }
 
+/* ── clickable tiles ─────────────────────────────── */
+.tile-ownable { cursor: pointer; }
+.tile-ownable:hover { filter: brightness(1.22); }
+
+/* ── auction timer ───────────────────────────────── */
+.auction-timer-wrap {
+  position: relative;
+  height: 6px;
+  background: var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 8px 0 12px;
+}
+.auction-timer-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 3px;
+  transition: width .95s linear, background .3s;
+}
+.auction-timer-label {
+  position: absolute;
+  right: 0; top: -18px;
+  font-size: .7rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* ── deed / tile-details modal ───────────────────── */
+.deed-modal { max-width: 360px; padding: 0 0 18px; overflow: hidden; }
+
+.deed-banner {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+  border-radius: 14px 14px 0 0;
+}
+.deed-group-name {
+  font-size: .75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: rgba(255,255,255,.92);
+}
+
+.deed-head {
+  padding: 12px 16px 0;
+  margin-bottom: 4px;
+}
+.deed-title { font-size: 1.05rem; font-weight: 800; margin: 0; }
+
+.deed-owner-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 16px 8px;
+  font-size: .82rem;
+  color: var(--muted);
+}
+.deed-owner-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,.3);
+  flex-shrink: 0;
+}
+.deed-unowned { color: var(--muted); }
+
+.rent-table {
+  width: calc(100% - 32px);
+  margin: 0 16px 10px;
+  border-collapse: collapse;
+  font-size: .82rem;
+}
+.rent-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  color: var(--muted);
+}
+.rent-table td:last-child { text-align: right; }
+.rent-val { font-weight: 700; color: var(--text); }
+.rent-row-active td { background: rgba(91,107,255,.15); color: var(--text); border-radius: 4px; }
+.rent-row-active .rent-val { color: var(--accent); }
+
+.deed-meta {
+  display: flex;
+  gap: 14px;
+  padding: 0 16px 10px;
+  font-size: .78rem;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+.deed-meta strong { color: var(--text); }
+
+.deed-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 6px 16px 0;
+}
+.deed-actions button { width: 100%; }
+
+/* ── win screen ──────────────────────────────────── */
+.win-screen {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  background: rgba(5, 8, 25, 0.82);
+  backdrop-filter: blur(4px);
+  animation: fadeIn .35s ease;
+}
+
+/* confetti */
+.confetti-container {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  animation: confettiFall linear infinite;
+  transform: rotate(var(--rotate, 0deg));
+  will-change: transform;
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(-20px) rotate(var(--rotate, 0deg)); opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateY(105vh) rotate(calc(var(--rotate, 0deg) + 720deg)); opacity: 0; }
+}
+
+.win-card {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 28px 28px 24px;
+  width: 100%; max-width: 420px;
+  box-shadow: 0 32px 80px rgba(0,0,0,.7);
+  text-align: center;
+  animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+.win-trophy { font-size: 3.5rem; margin-bottom: 8px; line-height: 1; }
+.win-winner { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 20px; }
+.win-token {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  box-shadow: 0 0 0 4px rgba(255,255,255,.2);
+}
+.win-name { margin: 0; font-size: 1.5rem; font-weight: 800; }
+
+.win-leaderboard { margin: 0 0 20px; text-align: left; }
+.win-lb-title {
+  font-size: .7rem; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--muted); margin-bottom: 8px; font-weight: 700;
+}
+.win-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px; border-radius: 8px;
+  margin-bottom: 4px;
+  background: var(--bg2);
+  font-size: .88rem;
+}
+.win-row-first { background: rgba(91,107,255,.15); border: 1px solid rgba(91,107,255,.35); }
+.win-rank { font-weight: 800; color: var(--muted); min-width: 24px; }
+.win-p-token {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; flex-shrink: 0;
+}
+.win-p-name { flex: 1; font-weight: 600; }
+.win-p-worth { font-weight: 800; color: var(--good); font-size: .9rem; }
+.win-bankrupt { font-size: .65rem; color: var(--bad); border: 1px solid var(--bad); border-radius: 4px; padding: 1px 4px; }
+
 /* ── responsive ──────────────────────────────────── */
 @media (max-width: 900px) {
   :root { --side: 260px; }

@@ -11,17 +11,19 @@ import { CardPopup } from '../components/CardPopup';
 import { Log } from '../components/Log';
 import { Chat } from '../components/Chat';
 import { DiceRollOverlay } from '../components/DiceRollOverlay';
+import { TileDetailsModal } from '../components/TileDetailsModal';
+import { WinScreen } from '../components/WinScreen';
 
 export function Game() {
   const { room, me } = useStore();
   const [showManage, setShowManage] = useState(false);
   const [showTrade, setShowTrade] = useState(false);
+  const [selectedTileId, setSelectedTileId] = useState<number | null>(null);
   const [diceNotif, setDiceNotif] = useState<{
     name: string; color: string; avatar: string; d1: number; d2: number;
   } | null>(null);
 
   const prevDiceRef = useRef<string | null>(null);
-
   const game = room?.game;
 
   useEffect(() => {
@@ -43,6 +45,9 @@ export function Game() {
     return () => clearTimeout(t);
   }, [game?.dice?.join('-')]);
 
+  // Close deed modal when phase changes (e.g. after buy)
+  useEffect(() => { setSelectedTileId(null); }, [game?.phase]);
+
   if (!room || !game) return null;
 
   const incomingTrades = game.pendingTrades.filter((t) => t.to === me).length;
@@ -55,16 +60,17 @@ export function Game() {
       {/* Turn banner */}
       <div className="turn-banner" style={{ borderColor: current?.color }}>
         <span className="turn-banner-dot" style={{ background: current?.color }} />
-        {myTurn
-          ? '🎯 Your turn'
-          : `${current?.name}'s turn`}
-        {game.phase === 'ended' && '  🏆 Game over'}
+        {game.phase === 'ended'
+          ? '🏆 Game over'
+          : myTurn
+            ? '🎯 Your turn'
+            : `${current?.name}'s turn`}
       </div>
 
       <div className="game-body">
         {/* Board area */}
         <div className="game-main">
-          <Board game={game} me={me} />
+          <Board game={game} me={me} onTileClick={setSelectedTileId} />
           {diceNotif && <DiceRollOverlay {...diceNotif} />}
           <CardPopup game={game} />
         </div>
@@ -93,12 +99,25 @@ export function Game() {
         </aside>
       </div>
 
-      {/* Map label floating on board */}
+      {/* Map label */}
       <div className="map-label">{map.name}</div>
 
+      {/* Modals */}
       <AuctionModal game={game} me={me} />
       {showManage && <ManageModal game={game} me={me} onClose={() => setShowManage(false)} />}
       {showTrade && <TradeModal game={game} me={me} onClose={() => setShowTrade(false)} />}
+
+      {selectedTileId !== null && (
+        <TileDetailsModal
+          tileId={selectedTileId}
+          game={game}
+          me={me}
+          onClose={() => setSelectedTileId(null)}
+        />
+      )}
+
+      {/* Win screen overlay */}
+      {game.phase === 'ended' && <WinScreen game={game} />}
     </div>
   );
 }
